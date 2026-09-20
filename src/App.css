@@ -75,7 +75,8 @@
   gap: 0.75rem;
 }
 
-/* The verify panel reports on the whole studio, so it spans all columns. */
+/* Panels that report on the whole studio rather than one column. */
+.ws-panel-wide,
 .ws-studio > .ws-panel:last-child {
   grid-column: 1 / -1;
 }
@@ -191,9 +192,9 @@
 /* --- grid ----------------------------------------------------------------- */
 .ws-grid {
   display: block;
-  width: 100%;
   height: auto;
   max-height: 68vh;
+  margin: 0 auto;
 }
 
 .ws-cell {
@@ -210,13 +211,21 @@
   fill: rgba(94, 234, 255, 0.18);
 }
 
-/* Masked-out cells still need a hit area so they can be clicked back in. */
-.ws-cell-void {
+/* Every cell carries a transparent hit area, including masked-out ones, so a
+   carved cell can be clicked back in and editing still works with the borders
+   hidden - there is no box to aim at in that mode. */
+.ws-cell-hit {
   fill: transparent;
 }
 
-.ws-cell:hover .ws-cell-void {
-  fill: rgba(255, 255, 255, 0.05);
+.ws-cell:hover .ws-cell-hit {
+  fill: rgba(94, 234, 255, 0.1);
+}
+
+/* Borderless mode: the answer tint is the only fill drawn, and it carries no
+   outline so the letters still read as sitting on the page background. */
+.ws-cell-bare {
+  stroke: none;
 }
 
 .ws-cell-answer {
@@ -338,4 +347,145 @@
 .ws-check-body em {
   color: #8fa0b4;
   font-style: normal;
+}
+
+/* --- output: shirt mockup ------------------------------------------------- */
+.ws-output-body {
+  display: grid;
+  grid-template-columns: minmax(200px, 1fr) minmax(240px, 420px);
+  gap: 1rem;
+  align-items: start;
+}
+
+@media (max-width: 760px) {
+  .ws-output-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ws-output-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.ws-swatch {
+  display: inline-block;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 2px;
+  margin-right: 0.4rem;
+  vertical-align: -1px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.ws-shirt {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  height: auto;
+  margin: 0 auto;
+}
+
+.ws-shirt-body {
+  stroke: rgba(255, 255, 255, 0.22);
+  stroke-width: 2;
+}
+
+.ws-shirt-collar {
+  opacity: 0.32;
+}
+
+/* Cells rendered for display only, such as on the mockup. */
+.ws-cell-static {
+  cursor: default;
+}
+
+.ws-cell-static:hover .ws-cell-hit {
+  fill: transparent;
+}
+
+/* --- print ----------------------------------------------------------------
+   Printing outputs the puzzle, not the page. Everything else is hidden rather
+   than restyled, so what reaches the paper (or the transfer) is the grid and,
+   optionally, the word list. */
+.ws-print-words {
+  display: none;
+}
+
+@media print {
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  .app-header,
+  .ws-controls,
+  .ws-words,
+  .ws-output,
+  .ws-preview > .ws-panel-title,
+  .ws-preview > .ws-hint,
+  .ws-studio > .ws-panel:last-child {
+    display: none !important;
+  }
+
+  .ws-studio {
+    display: block !important;
+    max-width: none !important;
+    gap: 0 !important;
+  }
+
+  .ws-preview {
+    border: none !important;
+    background: none !important;
+    padding: 0 !important;
+  }
+
+  .ws-grid {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: none !important;
+  }
+
+  /* Ink, not screen colour: a dark fill would waste toner on paper and is
+     wrong for a transfer. */
+  .ws-letter {
+    fill: #000 !important;
+  }
+
+  .ws-cell-box {
+    fill: none !important;
+    stroke: #000 !important;
+  }
+
+  .ws-cell-hit {
+    fill: none !important;
+  }
+
+  /* The solution never prints. Nobody wants it on the shirt, and a printed
+     answer key is still an open question. */
+  .ws-answer-line,
+  .ws-cell-answer {
+    display: none !important;
+  }
+
+  .ws-print-words {
+    display: block !important;
+    margin-top: 1rem;
+    color: #000 !important;
+    break-inside: avoid;
+  }
+
+  .ws-print-words h2 {
+    font-size: 1rem;
+    margin: 0 0 0.4rem;
+  }
+
+  .ws-print-words ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    columns: 4;
+    font-size: 0.9rem;
+  }
 }
