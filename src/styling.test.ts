@@ -37,3 +37,44 @@ describe('Tailwind prerequisite for NeonBlade', () => {
     expect(pkg.devDependencies).toHaveProperty('@tailwindcss/vite')
   })
 })
+
+/*
+ * The print output is defined entirely in CSS, and jsdom does not evaluate
+ * @media print, so no rendering test can observe it. A regression here is
+ * invisible until something is actually printed - which, for a design going
+ * onto fabric, is the most expensive possible moment to find out. These read
+ * the rules directly.
+ */
+describe('print output', () => {
+  const css = readFileSync(join(process.cwd(), 'src/App.css'), 'utf-8')
+  const printBlock = css.slice(css.indexOf('@media print'))
+
+  it('has a print block at all', () => {
+    expect(css).toMatch(/@media print/)
+  })
+
+  it('hides the page chrome, so the puzzle prints rather than the app', () => {
+    for (const selector of ['.app-header', '.ws-controls', '.ws-words', '.ws-output']) {
+      expect(printBlock).toContain(selector)
+    }
+  })
+
+  it('forces the letters to black ink', () => {
+    // The screen theme is light text on a dark background, which would print as
+    // a solid block of toner and is wrong for a transfer.
+    expect(printBlock).toMatch(/\.ws-letter\s*\{[^}]*fill:\s*#000/)
+  })
+
+  it('prints the page background white', () => {
+    expect(printBlock).toMatch(/body\s*\{[^}]*background:\s*#fff/)
+  })
+
+  it('never prints the answers', () => {
+    expect(printBlock).toMatch(/\.ws-answer-line,\s*\.ws-cell-answer\s*\{[^}]*display:\s*none/)
+  })
+
+  it('keeps the print-only word list hidden on screen', () => {
+    expect(css).toMatch(/\.ws-print-words\s*\{\s*display:\s*none/)
+    expect(printBlock).toMatch(/\.ws-print-words\s*\{[^}]*display:\s*block/)
+  })
+})

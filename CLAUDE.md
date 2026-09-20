@@ -14,7 +14,8 @@ searches on t-shirts.
 > product has no clues and no interlocking requirement.
 
 The studio screen exists: shape, size, difficulty and a word list, regenerating a preview
-live, with a verifier. Still absent: export (SVG/PDF/JSON), persistence, and routing.
+live, with a verifier, browser-printing, a t-shirt mockup, and drafts saved to
+`localStorage`. Still absent: file export (SVG/PDF/JSON) and routing.
 
 ## Commands
 
@@ -75,6 +76,20 @@ being evidence of anything.
 `puzzle()`, `grid()`) is wired in `PuzzleStudio` and calls the same functions the UI does,
 so the two can never disagree. `wsb.grid()` prints the grid as text, which is the fastest
 way to eyeball a shape.
+
+**Printing is CSS, not a second render.** `@media print` in `src/App.css` hides the app
+chrome so the existing preview SVG is what reaches the paper. Do not build a separate print
+component: two renderers would drift, and the whole point is that what was approved is what
+prints. jsdom does not evaluate `@media print`, so those rules are guarded by reading the
+stylesheet in `src/styling.test.ts` - a rendering test cannot see them.
+
+**The shirt mockup reuses `GridCells`** rather than drawing its own grid, scaled into the
+chest area by a nested `<svg>`. Its cells are `aria-hidden`, which is also what keeps
+`getAllByRole('gridcell')` returning only the preview's.
+
+**Anything read back from `localStorage` is untrusted.** `persistence.ts` validates every
+field and discards the whole payload on any mismatch, including a version bump. A draft is
+not worth a migration path, and half-restoring a state is worse than starting clean.
 
 **Verification results are stored with the puzzle they describe**, and staleness is derived
 rather than cleared in an effect. A PASS must never be visible next to a grid that has since
