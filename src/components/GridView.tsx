@@ -2,15 +2,21 @@ import { useMemo } from 'react'
 import { indexOf, type Placement, type Puzzle } from '../domain/types'
 
 /**
- * The glyph box: the space one letter and its cell border occupy.
+ * The letter itself, at the font size `.ws-letter` renders. Everything else is
+ * measured outwards from this, which keeps the two spacing dials independent:
  *
- * Spacing is added around this rather than baked into it, so widening the gap
- * separates the letters instead of inflating the boxes.
+ *   box   = GLYPH + 2 * cellPadding   <- room around the letter, inside its cell
+ *   pitch = box + letterSpacing       <- gap between one cell and the next
  */
-const BOX = 30
+const GLYPH = 16
 
 export const SPACING_MIN = 0
 export const SPACING_MAX = 20
+
+export const PADDING_MIN = 0
+export const PADDING_MAX = 16
+/** Reproduces the original fixed 30px box, so the default look is unchanged. */
+export const PADDING_DEFAULT = 7
 
 export interface GridViewProps {
   readonly puzzle: Puzzle
@@ -18,8 +24,10 @@ export interface GridViewProps {
   readonly showAnswers: boolean
   /** Draw each cell's box. With it off the letters sit straight on the page background. */
   readonly showBorders: boolean
-  /** Extra pixels between adjacent letters. */
+  /** Extra pixels between adjacent cells. */
   readonly letterSpacing: number
+  /** Pixels of breathing room around the letter, inside its own cell. */
+  readonly cellPadding: number
   readonly onToggleCell: (row: number, col: number) => void
 }
 
@@ -34,13 +42,16 @@ export default function GridView({
   showAnswers,
   showBorders,
   letterSpacing,
+  cellPadding,
   onToggleCell,
 }: GridViewProps) {
   const { mask, letters, placements } = puzzle
 
-  // Cell pitch grows with the spacing while the box stays put, so the boxes
-  // separate rather than swell. The inset keeps each box centred in its cell.
-  const pitch = BOX + letterSpacing
+  // Two independent dials. Padding sets how much room the letter gets inside
+  // its box; spacing sets how far apart the boxes sit. Changing one must not
+  // move the other, which is why the box is derived rather than fixed.
+  const box = GLYPH + 2 * cellPadding
+  const pitch = box + letterSpacing
   const inset = letterSpacing / 2
 
   // Precompute which cells belong to an answer, so highlighting does not
@@ -95,9 +106,9 @@ export default function GridView({
             <rect
               x={col * pitch + inset}
               y={row * pitch + inset}
-              width={BOX}
-              height={BOX}
-              rx={4}
+              width={box}
+              height={box}
+              rx={Math.min(4, box / 4)}
               className={boxClass}
             />
           )}

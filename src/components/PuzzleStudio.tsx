@@ -7,7 +7,13 @@ import type { ShapeName } from '../domain/shapes'
 import type { Puzzle } from '../domain/types'
 import { parseWordList } from '../domain/words'
 import { verifyPuzzle, type VerifyResult } from '../domain/verify'
-import GridView, { SPACING_MAX, SPACING_MIN } from './GridView'
+import GridView, {
+  PADDING_DEFAULT,
+  PADDING_MAX,
+  PADDING_MIN,
+  SPACING_MAX,
+  SPACING_MIN,
+} from './GridView'
 import VerifyPanel from './VerifyPanel'
 
 const DEFAULT_WORDS = [
@@ -47,6 +53,7 @@ export default function PuzzleStudio() {
   const [showAnswers, setShowAnswers] = useState(false)
   const [showBorders, setShowBorders] = useState(true)
   const [letterSpacing, setLetterSpacing] = useState(0)
+  const [cellPadding, setCellPadding] = useState(PADDING_DEFAULT)
   // Stored with the puzzle it describes, so a result can never outlive its grid.
   const [verification, setVerification] = useState<{
     puzzle: Puzzle
@@ -177,6 +184,19 @@ export default function PuzzleStudio() {
           />
         </label>
 
+        <label className="ws-slider">
+          <span>
+            Cell padding <strong>{cellPadding}px</strong>
+          </span>
+          <input
+            type="range"
+            min={PADDING_MIN}
+            max={PADDING_MAX}
+            value={cellPadding}
+            onChange={(event) => setCellPadding(Number(event.target.value))}
+          />
+        </label>
+
         <label className="ws-toggle">
           <input
             type="checkbox"
@@ -227,6 +247,7 @@ export default function PuzzleStudio() {
           showAnswers={showAnswers}
           showBorders={showBorders}
           letterSpacing={letterSpacing}
+          cellPadding={cellPadding}
           onToggleCell={toggleCell}
         />
         <p className="ws-hint">
