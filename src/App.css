@@ -1,0 +1,34 @@
+.app-shell {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.app-title {
+  margin: 0;
+  /* Tailwind preflight sets h1 font-weight to inherit, so state it here. */
+  font-weight: 700;
+  font-size: clamp(2rem, 8vw, 4rem);
+  letter-spacing: 0.04em;
+}
+
+.app-tagline {
+  margin: 0;
+  max-width: 34ch;
+  font-size: 1.125rem;
+  line-height: 1.5;
+  color: #b9c6d6;
+}
+
+.app-status {
+  margin: 0;
+  font-size: 0.875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6c7a8a;
+}
