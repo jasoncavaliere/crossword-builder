@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it } from 'vitest'
 import App from './App'
 
@@ -18,14 +19,14 @@ describe('App', () => {
   })
 
   it('renders the NeonBlade call to action', () => {
-    expect(screen.getByRole('button', { name: /start a puzzle/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /verify puzzle/i })).toBeInTheDocument()
   })
 
   it('builds the call to action from the NeonBlade component, not plain markup', () => {
     // Guards the swap case: text and role assertions alone would still pass if the
     // component were replaced by a bare <button>, which is how the unstyled-CTA
     // regression stayed invisible before.
-    const button = screen.getByRole('button', { name: /start a puzzle/i })
+    const button = screen.getByRole('button', { name: /verify puzzle/i })
     expect(button.className).toMatch(/\bccb-/)
     // Layout and typography come from Tailwind utilities, so their presence is
     // what distinguishes a real NeonBlade render from bare markup.
@@ -37,5 +38,76 @@ describe('App', () => {
     const glow = screen.getByRole('heading', { level: 1 }).querySelector('span')
     expect(glow).not.toBeNull()
     expect(glow?.getAttribute('style')).toMatch(/linear-gradient/)
+  })
+})
+
+describe('the studio', () => {
+  beforeEach(() => {
+    render(<App />)
+  })
+
+  it('renders a grid preview on first load, with no interaction needed', () => {
+    const grid = screen.getByRole('grid', { name: /word search preview/i })
+    expect(within(grid).getAllByRole('gridcell').length).toBe(14 * 14)
+  })
+
+  it('offers every shape and difficulty as a control', () => {
+    for (const shape of ['Rectangle', 'Heart', 'Circle', 'Diamond', 'Star']) {
+      expect(screen.getByRole('button', { name: shape })).toBeInTheDocument()
+    }
+    for (const level of ['easy', 'classic', 'hard']) {
+      expect(screen.getByRole('button', { name: level })).toBeInTheDocument()
+    }
+  })
+
+  it('starts on Classic, and says which directions that means', () => {
+    expect(screen.getByRole('button', { name: 'classic' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByText(/directions: E, S, SE, NE/i)).toBeInTheDocument()
+  })
+
+  it('regenerates when the shape changes, dropping cells out of play', async () => {
+    const countLettered = () =>
+      screen
+        .getAllByRole('gridcell')
+        .filter((cell) => !/outside the shape/.test(cell.getAttribute('aria-label') ?? '')).length
+
+    const asRectangle = countLettered()
+    await userEvent.click(screen.getByRole('button', { name: 'Circle' }))
+
+    expect(countLettered()).toBeLessThan(asRectangle)
+  })
+
+  it('regenerates when the size changes', () => {
+    expect(screen.getAllByRole('gridcell')).toHaveLength(14 * 14)
+
+    // A range input is set, not typed into.
+    fireEvent.change(screen.getByLabelText(/width/i), { target: { value: '10' } })
+
+    expect(screen.getAllByRole('gridcell')).toHaveLength(10 * 14)
+  })
+
+  it('verifies the generated puzzle and reports a pass', async () => {
+    await userEvent.click(screen.getByRole('button', { name: /verify puzzle/i }))
+
+    expect(screen.getByText(/this is a valid word search/i)).toBeInTheDocument()
+    expect(screen.getByText(/every hidden word is findable/i)).toBeInTheDocument()
+    expect(screen.queryByText(/^FAIL/)).not.toBeInTheDocument()
+  })
+
+  it('clears a stale verification once the puzzle changes underneath it', async () => {
+    await userEvent.click(screen.getByRole('button', { name: /verify puzzle/i }))
+    expect(screen.getByText(/this is a valid word search/i)).toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('button', { name: /re-roll/i }))
+
+    // A PASS left on screen next to a puzzle that has since regenerated would
+    // be a claim about a grid that no longer exists.
+    expect(screen.queryByText(/this is a valid word search/i)).not.toBeInTheDocument()
+  })
+
+  it('exposes the verifier on window for console use', () => {
+    expect(typeof window.wsb.verify).toBe('function')
+    expect(window.wsb.verify().ok).toBe(true)
+    expect(window.wsb.grid().split('\n')).toHaveLength(14)
   })
 })

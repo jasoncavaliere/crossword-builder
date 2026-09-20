@@ -13,9 +13,8 @@ searches on t-shirts.
 > black squares anywhere in this repo, it is a leftover and it is wrong - fix it. The
 > product has no clues and no interlocking requirement.
 
-As of the scaffold (#1) there is **no puzzle domain code at all**: no grid model, no
-cell/word/placement types, no generation, no export, no persistence, no routing. That is
-deliberate, not an omission. See "Product direction" below before adding any.
+The studio screen exists: shape, size, difficulty and a word list, regenerating a preview
+live, with a verifier. Still absent: export (SVG/PDF/JSON), persistence, and routing.
 
 ## Commands
 
@@ -51,6 +50,35 @@ plugin, and the Vitest config (hence `defineConfig` is imported from `vitest/con
 this as a project page, `/` in dev. Change one and you break either the deployed site or
 the dev server, so verify both: `npm run build` then grep `dist/index.html` for the asset
 paths, and `npm run dev` for the root case.
+
+**`src/domain/` is pure and React-free**, and that separation is load-bearing: it is what
+lets the generator be tested against a seeded RNG with no rendering involved.
+
+| Module          | Responsibility                                                                 |
+| --------------- | ------------------------------------------------------------------------------ |
+| `types.ts`      | `Mask`, `WordEntry`, `Placement`, `Puzzle`, plus `isInPlay` and index helpers. |
+| `directions.ts` | The eight vectors and the difficulty subsets.                                  |
+| `rng.ts`        | Seeded mulberry32. Every randomized function takes an `Rng` parameter.         |
+| `shapes.ts`     | Shape presets as `(w, h) -> Mask`, plus per-cell overrides.                    |
+| `words.ts`      | Normalization (`New York` -> `NEWYORK`) and pasted-list parsing.               |
+| `filler.ts`     | English frequency-weighted filler letters.                                     |
+| `generate.ts`   | Greedy randomized placement, longest word first, then filler.                  |
+| `verify.ts`     | Independent re-solve and rule checks.                                          |
+
+**The verifier does not trust the generator.** `verify.ts` reads the rendered letters back
+out of the grid rather than believing the placement records, because a generator that
+reports a placement it never wrote is exactly the bug worth catching. Keep it that way: if
+you ever make it consult `puzzle.placements` to decide whether a word is findable, it stops
+being evidence of anything.
+
+**The console API is the same code as the panel.** `window.wsb` (`verify()`, `state()`,
+`puzzle()`, `grid()`) is wired in `PuzzleStudio` and calls the same functions the UI does,
+so the two can never disagree. `wsb.grid()` prints the grid as text, which is the fastest
+way to eyeball a shape.
+
+**Verification results are stored with the puzzle they describe**, and staleness is derived
+rather than cleared in an effect. A PASS must never be visible next to a grid that has since
+regenerated.
 
 **TypeScript is a project-references build** (`tsconfig.json` references `tsconfig.app.json`
 and `tsconfig.node.json`). `strict` and the `types` array live in `tsconfig.app.json`.
@@ -148,7 +176,7 @@ printf '\n' | NEONBLADE_TELEMETRY=false npx neonblade add <name>
 
 ## Testing
 
-Two files, two jobs.
+Three groups, three jobs.
 
 - `src/App.test.tsx` renders the app and asserts user-visible content. It also asserts the
   CTA carries its `ccb-*` classes and Tailwind layout utilities, and that the heading
@@ -156,6 +184,9 @@ Two files, two jobs.
   would pass against plain markup, which is exactly how the unstyled-component bug hid.
 - `src/styling.test.ts` guards the Tailwind wiring itself: the `@import`, the Vite plugin,
   the `index.css` import from `main.tsx`, and the dependencies.
+- `src/domain/*.test.ts` cover the pure layer. `verify.test.ts` is the one to read first:
+  each case breaks one specific rule and asserts the matching check goes red, because a
+  verifier that cannot be made to fail proves nothing.
 
 When adding a test for rendered styling, remember jsdom does not apply stylesheets. Assert
 on class names or inline styles, or check the built CSS in `dist/`.
@@ -189,10 +220,10 @@ fixed board size, or a rectangle-only assumption. Planned export targets are SVG
 Persistence is client-only - `localStorage` plus JSON import/export. There is no backend
 and none is planned.
 
-Several product questions remain **deliberately unanswered** - filler-letter strategy,
-whether unintended words are policed, how the shape mask is authored, and what the t-shirt
-output actually needs. They are listed in `docs/decisions.md`. Do not pick one
-unilaterally; ask.
+Several product questions remain **deliberately unanswered** - whether unintended words are
+policed, what the t-shirt output actually needs, where the answer key goes, and whether
+shape authoring grows beyond the presets. They are listed in `docs/decisions.md`. Do not
+pick one unilaterally; ask.
 
 ## Workflow conventions
 
