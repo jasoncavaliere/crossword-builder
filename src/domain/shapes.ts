@@ -7,7 +7,7 @@ import type { Mask } from './types'
  * what lets the width and height dials re-rasterize live: resizing a heart
  * recomputes it rather than stretching a bitmap.
  */
-export const SHAPE_NAMES = ['rectangle', 'heart', 'circle', 'diamond', 'star'] as const
+export const SHAPE_NAMES = ['rectangle', 'heart', 'circle', 'diamond', 'star', 'mickey'] as const
 export type ShapeName = (typeof SHAPE_NAMES)[number]
 
 export const SHAPE_LABELS: Record<ShapeName, string> = {
@@ -16,6 +16,7 @@ export const SHAPE_LABELS: Record<ShapeName, string> = {
   circle: 'Circle',
   diamond: 'Diamond',
   star: 'Star',
+  mickey: 'Mickey Ears',
 }
 
 /**
@@ -59,6 +60,18 @@ const SHAPE_TESTS: Record<ShapeName, ShapeTest> = {
     const limit = outer + (inner - outer) * toNearestSpike
 
     return radius <= limit
+  },
+
+  // A head with two ears: three overlapping discs. The ear discs sit close
+  // enough that they overlap the head rather than merely touching it - tangent
+  // circles rasterize into a pinched join that can break the silhouette, and
+  // can leave an ear as an island with no run into the head.
+  mickey: (x, y) => {
+    const inDisc = (cx: number, cy: number, r: number) =>
+      (x - cx) * (x - cx) + (y - cy) * (y - cy) <= r * r
+
+    // y is negative upward, so the ears carry negative centres.
+    return inDisc(0, 0.28, 0.66) || inDisc(-0.55, -0.45, 0.36) || inDisc(0.55, -0.45, 0.36)
   },
 }
 

@@ -5,7 +5,7 @@ const CELL = 30
 
 export interface GridViewProps {
   readonly puzzle: Puzzle
-  /** Draw the answer key over the grid. A prototyping aid; where the key goes in the exported artifact is still open. */
+  /** Draw the answer key over the grid, so the puzzle's owner can help a stuck solver. Where the key goes in the *exported* artifact is still open. */
   readonly showAnswers: boolean
   readonly onToggleCell: (row: number, col: number) => void
 }
