@@ -9,11 +9,11 @@ export default function App() {
         {/* gradientGlow is required for the halo: a multi-colour NeonGlow
             suppresses its glow unless this or glowColor is set. */}
         <NeonGlow colors={['cyan', 'pink']} glowIntensity="strong" gradientGlow>
-          Crossword Builder
+          Word Search Builder
         </NeonGlow>
       </h1>
 
-      <p className="app-tagline">Design a crossword in the browser and export it print-ready.</p>
+      <p className="app-tagline">Design a word search in the browser and export it print-ready.</p>
 
       {/* hoverEffect="none" because the button is disabled until there is a
           puzzle to build; the vendored CSS has no :disabled guard of its own. */}

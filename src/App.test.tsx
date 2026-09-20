@@ -8,12 +8,12 @@ describe('App', () => {
   })
 
   it('renders the product name as the page heading', () => {
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Crossword Builder')
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Word Search Builder')
   })
 
   it('renders a tagline describing what the app does', () => {
     expect(
-      screen.getByText(/design a crossword in the browser and export it print-ready/i),
+      screen.getByText(/design a word search in the browser and export it print-ready/i),
     ).toBeInTheDocument()
   })
 

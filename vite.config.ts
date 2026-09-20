@@ -4,9 +4,9 @@ import { defineConfig } from 'vitest/config'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
-  // GitHub Pages serves this repo as a project page under /crossword-builder/.
+  // GitHub Pages serves this repo as a project page under /word-search-builder/.
   // Dev stays at the root so the dev server is not needlessly nested.
-  base: mode === 'production' ? '/crossword-builder/' : '/',
+  base: mode === 'production' ? '/word-search-builder/' : '/',
   plugins: [react(), tailwindcss()],
   test: {
     environment: 'jsdom',

@@ -1,13 +1,28 @@
-# crossword-builder
+# word-search-builder
 
-A standalone crossword puzzle builder that runs entirely in the browser. Design a puzzle,
-then export it print-ready.
+A standalone word search builder that runs entirely in the browser. Lay out a grid, hide a
+list of words in it, then export it print-ready.
 
-This started as a way to put crossword puzzles on t-shirts for a trip.
+This started as a way to put word search puzzles on t-shirts for a trip.
 
 > **Status: scaffold.** The application shell, tooling, and deployment are in place. There
-> is no puzzle logic yet - no grid model, no generation, no export. Those land as separate
+> is no puzzle logic yet - no grid model, no placement, no export. Those land as separate
 > issues.
+
+## What a word search is, in this project's terms
+
+Worth stating plainly, because it drives every type in the codebase:
+
+- A **grid** is a lattice of cells plus a per-cell mask. Masked-in cells hold a letter;
+  masked-out cells are outside the puzzle's shape. A plain rectangle is just a grid whose
+  mask is entirely on.
+- A **word list** is words, and only words. There are **no clues** - the solver is given
+  the words and hunts for them. This is the single biggest difference from a crossword and
+  it removes an entire half of the data model.
+- A **placement** pins one word to a start cell and a direction vector. Words may overlap
+  where their letters agree, but nothing forces them to interlock.
+- **Filler letters** occupy every masked-in cell no word claimed.
+- An **answer key** is the set of placements, drawn back over the grid.
 
 ## Stack
 
@@ -100,8 +115,8 @@ Two GitHub Actions workflows:
   and publishes it to GitHub Pages.
 
 The site is served as a _project_ page at
-`https://jasoncavaliere.github.io/crossword-builder/`, so `vite.config.ts` sets `base` to
-`/crossword-builder/` for production builds while leaving dev at the root.
+`https://jasoncavaliere.github.io/word-search-builder/`, so `vite.config.ts` sets `base` to
+`/word-search-builder/` for production builds while leaving dev at the root.
 
 **One-time setup:** GitHub Pages must be enabled for the repository with the source set to
 **GitHub Actions** (Settings > Pages > Source). The deploy workflow cannot enable it.
