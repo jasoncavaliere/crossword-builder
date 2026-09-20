@@ -7,7 +7,7 @@ import type { ShapeName } from '../domain/shapes'
 import type { Puzzle } from '../domain/types'
 import { parseWordList } from '../domain/words'
 import { verifyPuzzle, type VerifyResult } from '../domain/verify'
-import GridView from './GridView'
+import GridView, { SPACING_MAX, SPACING_MIN } from './GridView'
 import VerifyPanel from './VerifyPanel'
 
 const DEFAULT_WORDS = [
@@ -45,6 +45,8 @@ export default function PuzzleStudio() {
   const [wordsText, setWordsText] = useState(DEFAULT_WORDS)
   const [overrides, setOverrides] = useState<ReadonlyMap<string, boolean>>(new Map())
   const [showAnswers, setShowAnswers] = useState(false)
+  const [showBorders, setShowBorders] = useState(true)
+  const [letterSpacing, setLetterSpacing] = useState(0)
   // Stored with the puzzle it describes, so a result can never outlive its grid.
   const [verification, setVerification] = useState<{
     puzzle: Puzzle
@@ -162,6 +164,28 @@ export default function PuzzleStudio() {
           />
         </label>
 
+        <label className="ws-slider">
+          <span>
+            Letter spacing <strong>{letterSpacing}px</strong>
+          </span>
+          <input
+            type="range"
+            min={SPACING_MIN}
+            max={SPACING_MAX}
+            value={letterSpacing}
+            onChange={(event) => setLetterSpacing(Number(event.target.value))}
+          />
+        </label>
+
+        <label className="ws-toggle">
+          <input
+            type="checkbox"
+            checked={showBorders}
+            onChange={(event) => setShowBorders(event.target.checked)}
+          />
+          Cell borders
+        </label>
+
         <h2 className="ws-panel-title">Difficulty</h2>
         <div className="ws-chip-row">
           {DIFFICULTY_ORDER.map((level) => (
@@ -198,7 +222,13 @@ export default function PuzzleStudio() {
 
       <section className="ws-panel ws-preview">
         <h2 className="ws-panel-title">Preview</h2>
-        <GridView puzzle={puzzle} showAnswers={showAnswers} onToggleCell={toggleCell} />
+        <GridView
+          puzzle={puzzle}
+          showAnswers={showAnswers}
+          showBorders={showBorders}
+          letterSpacing={letterSpacing}
+          onToggleCell={toggleCell}
+        />
         <p className="ws-hint">
           {inPlayCells} cells in play, {puzzle.placements.length} of {words.length} words hidden.
         </p>
