@@ -231,3 +231,59 @@ describe('presentation controls', () => {
     expect(screen.getByLabelText(/letter spacing/i)).toHaveValue('0')
   })
 })
+
+describe('cell padding', () => {
+  beforeEach(() => {
+    render(<App />)
+  })
+
+  const boxSize = () => Number(document.querySelector('.ws-cell-box')!.getAttribute('width'))
+  const pitch = () => {
+    const grid = document.querySelector('.ws-grid') as SVGSVGElement
+    const [, , width] = grid.getAttribute('viewBox')!.split(' ').map(Number)
+    return width / window.wsb.puzzle().mask.width
+  }
+  const setRange = (name: RegExp, value: string) =>
+    fireEvent.change(screen.getByLabelText(name), { target: { value } })
+
+  it('defaults to the padding that reproduces the original 30px box', () => {
+    expect(boxSize()).toBe(30)
+  })
+
+  it('tightens the space around each letter', () => {
+    setRange(/cell padding/i, '0')
+
+    // Padding 0 leaves just the glyph.
+    expect(boxSize()).toBe(16)
+  })
+
+  it('loosens it again', () => {
+    setRange(/cell padding/i, '16')
+    expect(boxSize()).toBe(48)
+  })
+
+  it('keeps every letter rendered at minimum padding', () => {
+    const before = document.querySelectorAll('.ws-letter').length
+    setRange(/cell padding/i, '0')
+
+    expect(document.querySelectorAll('.ws-letter')).toHaveLength(before)
+  })
+
+  it('leaves the gap between cells alone, so the two dials are independent', () => {
+    setRange(/letter spacing/i, '10')
+    const gapAtDefaultPadding = pitch() - boxSize()
+
+    setRange(/cell padding/i, '0')
+    expect(pitch() - boxSize()).toBeCloseTo(gapAtDefaultPadding, 5)
+
+    setRange(/cell padding/i, '16')
+    expect(pitch() - boxSize()).toBeCloseTo(gapAtDefaultPadding, 5)
+  })
+
+  it('shrinks the whole grid when the padding is reduced', () => {
+    const before = pitch()
+    setRange(/cell padding/i, '0')
+
+    expect(pitch()).toBeLessThan(before)
+  })
+})
