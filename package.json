@@ -1,5 +1,5 @@
 {
-  "name": "crossword-builder",
+  "name": "word-search-builder",
   "private": true,
   "version": "0.0.0",
   "type": "module",
