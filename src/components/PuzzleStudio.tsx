@@ -197,17 +197,7 @@ export default function PuzzleStudio() {
       </section>
 
       <section className="ws-panel ws-preview">
-        <div className="ws-panel-head">
-          <h2 className="ws-panel-title">Preview</h2>
-          <label className="ws-toggle">
-            <input
-              type="checkbox"
-              checked={showAnswers}
-              onChange={(event) => setShowAnswers(event.target.checked)}
-            />
-            Show answers
-          </label>
-        </div>
+        <h2 className="ws-panel-title">Preview</h2>
         <GridView puzzle={puzzle} showAnswers={showAnswers} onToggleCell={toggleCell} />
         <p className="ws-hint">
           {inPlayCells} cells in play, {puzzle.placements.length} of {words.length} words hidden.
@@ -247,7 +237,12 @@ export default function PuzzleStudio() {
         )}
       </section>
 
-      <VerifyPanel result={currentVerification} onVerify={runVerify} />
+      <VerifyPanel
+        result={currentVerification}
+        onVerify={runVerify}
+        showAnswers={showAnswers}
+        onToggleAnswers={() => setShowAnswers((shown) => !shown)}
+      />
     </div>
   )
 }

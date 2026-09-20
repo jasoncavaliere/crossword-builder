@@ -52,7 +52,7 @@ describe('the studio', () => {
   })
 
   it('offers every shape and difficulty as a control', () => {
-    for (const shape of ['Rectangle', 'Heart', 'Circle', 'Diamond', 'Star']) {
+    for (const shape of ['Rectangle', 'Heart', 'Circle', 'Diamond', 'Star', 'Mickey Ears']) {
       expect(screen.getByRole('button', { name: shape })).toBeInTheDocument()
     }
     for (const level of ['easy', 'classic', 'hard']) {
@@ -109,5 +109,58 @@ describe('the studio', () => {
     expect(typeof window.wsb.verify).toBe('function')
     expect(window.wsb.verify().ok).toBe(true)
     expect(window.wsb.grid().split('\n')).toHaveLength(14)
+  })
+})
+
+describe('highlighting answers', () => {
+  beforeEach(() => {
+    render(<App />)
+  })
+
+  it('draws no answer overlay until it is asked for', () => {
+    expect(document.querySelectorAll('.ws-answer-line')).toHaveLength(0)
+  })
+
+  it('draws one overlay per hidden word when turned on', async () => {
+    await userEvent.click(screen.getByRole('button', { name: /highlight answers/i }))
+
+    const placed = window.wsb.puzzle().placements.length
+    expect(placed).toBeGreaterThan(0)
+    expect(document.querySelectorAll('.ws-answer-line')).toHaveLength(placed)
+  })
+
+  it('tints the cells belonging to an answer, not the whole grid', async () => {
+    await userEvent.click(screen.getByRole('button', { name: /highlight answers/i }))
+
+    const tinted = document.querySelectorAll('.ws-cell-answer').length
+    const inPlay = window.wsb.puzzle().mask.cells.filter(Boolean).length
+    expect(tinted).toBeGreaterThan(0)
+    expect(tinted).toBeLessThan(inPlay)
+  })
+
+  it('flips its label so the button says what it will do next', async () => {
+    const button = screen.getByRole('button', { name: /highlight answers/i })
+    expect(button).toHaveAttribute('aria-pressed', 'false')
+
+    await userEvent.click(button)
+
+    const pressed = screen.getByRole('button', { name: /hide answers/i })
+    expect(pressed).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('turns the overlay back off', async () => {
+    await userEvent.click(screen.getByRole('button', { name: /highlight answers/i }))
+    await userEvent.click(screen.getByRole('button', { name: /hide answers/i }))
+
+    expect(document.querySelectorAll('.ws-answer-line')).toHaveLength(0)
+  })
+
+  it('keeps the highlight on while the puzzle is re-rolled', async () => {
+    await userEvent.click(screen.getByRole('button', { name: /highlight answers/i }))
+    await userEvent.click(screen.getByRole('button', { name: /re-roll/i }))
+
+    // Unlike a verification result, the highlight is a view preference rather
+    // than a claim about a specific grid, so it survives regeneration.
+    expect(document.querySelectorAll('.ws-answer-line').length).toBeGreaterThan(0)
   })
 })

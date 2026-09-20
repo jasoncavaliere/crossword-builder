@@ -4,6 +4,8 @@ import type { VerifyResult } from '../domain/verify'
 export interface VerifyPanelProps {
   readonly result: VerifyResult | null
   readonly onVerify: () => void
+  readonly showAnswers: boolean
+  readonly onToggleAnswers: () => void
 }
 
 /**
@@ -12,14 +14,32 @@ export interface VerifyPanelProps {
  * Deliberately shows the individual checks rather than one pass/fail: when a
  * puzzle is wrong, which rule it broke is the whole diagnostic.
  */
-export default function VerifyPanel({ result, onVerify }: VerifyPanelProps) {
+export default function VerifyPanel({
+  result,
+  onVerify,
+  showAnswers,
+  onToggleAnswers,
+}: VerifyPanelProps) {
   return (
     <section className="ws-panel">
       <div className="ws-panel-head">
         <h2 className="ws-panel-title">Verify</h2>
-        <CornerCutButton color="cyan" size="lg" variant="outline" onClick={onVerify}>
-          Verify puzzle
-        </CornerCutButton>
+        <div className="ws-button-row">
+          <CornerCutButton color="cyan" size="lg" variant="outline" onClick={onVerify}>
+            Verify puzzle
+          </CornerCutButton>
+          {/* Pink to match the highlight it turns on, so the control and its
+              effect read as the same thing. */}
+          <CornerCutButton
+            color="pink"
+            size="lg"
+            variant={showAnswers ? 'solid' : 'outline'}
+            onClick={onToggleAnswers}
+            aria-pressed={showAnswers}
+          >
+            {showAnswers ? 'Hide answers' : 'Highlight answers'}
+          </CornerCutButton>
+        </div>
       </div>
 
       {result === null ? (

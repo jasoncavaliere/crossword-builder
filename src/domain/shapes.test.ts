@@ -70,3 +70,60 @@ describe('applyOverrides', () => {
     expect(countInPlay(applyOverrides(mask, new Map([[cellKey(9, 9), false]])).cells)).toBe(9)
   })
 })
+
+describe('the mickey shape', () => {
+  /** Count the separate runs of in-play cells in one row. */
+  const runsInRow = (mask: ReturnType<typeof buildMask>, row: number) => {
+    let runs = 0
+    let previous = false
+    for (let col = 0; col < mask.width; col++) {
+      const current = isInPlay(mask, row, col)
+      if (current && !previous) runs++
+      previous = current
+    }
+    return runs
+  }
+
+  it('has two separate lobes near the top, which is what makes it ears', () => {
+    const mask = buildMask('mickey', 15, 15)
+    const rows = Array.from({ length: mask.height }, (_, row) => runsInRow(mask, row))
+    // Without a gap between them the ears would read as one wide blob.
+    expect(rows.some((runs) => runs === 2)).toBe(true)
+  })
+
+  it('joins into a single head below the ears', () => {
+    const mask = buildMask('mickey', 15, 15)
+    const bottomHalf = Array.from({ length: Math.floor(mask.height / 2) }, (_, i) =>
+      runsInRow(mask, mask.height - 1 - i),
+    ).filter((runs) => runs > 0)
+
+    expect(bottomHalf.every((runs) => runs === 1)).toBe(true)
+  })
+
+  it('overlaps the ears into the head rather than leaving them as islands', () => {
+    // Tangent circles rasterize into a pinched join, which can strand an ear
+    // with no run connecting it to the head.
+    const mask = buildMask('mickey', 21, 19)
+    const twoLobeRows: number[] = []
+    for (let row = 0; row < mask.height; row++) {
+      if (runsInRow(mask, row) === 2) twoLobeRows.push(row)
+    }
+
+    const firstMerged = twoLobeRows[twoLobeRows.length - 1] + 1
+    expect(runsInRow(mask, firstMerged)).toBe(1)
+  })
+
+  it('is wider across the ears than across the head', () => {
+    const mask = buildMask('mickey', 21, 19)
+    const widthAt = (row: number) => {
+      let count = 0
+      for (let col = 0; col < mask.width; col++) if (isInPlay(mask, row, col)) count++
+      return count
+    }
+    const widths = Array.from({ length: mask.height }, (_, row) => widthAt(row))
+    const earBand = Math.max(...widths.slice(0, Math.floor(mask.height / 2)))
+    const headBand = Math.max(...widths.slice(Math.floor(mask.height / 2)))
+
+    expect(earBand).toBeGreaterThan(headBand)
+  })
+})
