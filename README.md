@@ -31,14 +31,14 @@ npm run dev   # http://localhost:5173
 
 ## Scripts
 
-| Script | What it does |
-| --- | --- |
-| `npm run dev` | Start the Vite dev server with hot reload. |
-| `npm run build` | Typecheck the project references, then emit a production bundle to `dist/`. |
-| `npm run preview` | Serve the built `dist/` locally, to check the production build. |
-| `npm run lint` | Run ESLint over the project. |
-| `npm run typecheck` | Run the TypeScript compiler with no emit. |
-| `npm test` | Run the Vitest suite once, non-watch. |
+| Script              | What it does                                                                |
+| ------------------- | --------------------------------------------------------------------------- |
+| `npm run dev`       | Start the Vite dev server with hot reload.                                  |
+| `npm run build`     | Typecheck the project references, then emit a production bundle to `dist/`. |
+| `npm run preview`   | Serve the built `dist/` locally, to check the production build.             |
+| `npm run lint`      | Run ESLint over the project.                                                |
+| `npm run typecheck` | Run the TypeScript compiler with no emit.                                   |
+| `npm test`          | Run the Vitest suite once, non-watch.                                       |
 
 ## Adding a NeonBlade component
 
@@ -99,7 +99,7 @@ Two GitHub Actions workflows:
 - **`.github/workflows/deploy-pages.yml`** runs on every push to `main`: it builds the site
   and publishes it to GitHub Pages.
 
-The site is served as a *project* page at
+The site is served as a _project_ page at
 `https://jasoncavaliere.github.io/crossword-builder/`, so `vite.config.ts` sets `base` to
 `/crossword-builder/` for production builds while leaving dev at the root.
 
