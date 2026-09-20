@@ -164,3 +164,70 @@ describe('highlighting answers', () => {
     expect(document.querySelectorAll('.ws-answer-line').length).toBeGreaterThan(0)
   })
 })
+
+describe('presentation controls', () => {
+  beforeEach(() => {
+    render(<App />)
+  })
+
+  const boxes = () => document.querySelectorAll('.ws-cell-box').length
+  const letters = () => document.querySelectorAll('.ws-letter').length
+  const viewBox = () =>
+    (document.querySelector('.ws-grid') as SVGSVGElement)
+      .getAttribute('viewBox')!
+      .split(' ')
+      .map(Number)
+
+  it('draws a box per in-play cell by default', () => {
+    expect(boxes()).toBe(window.wsb.puzzle().mask.cells.filter(Boolean).length)
+  })
+
+  it('drops every box when cell borders are turned off, keeping the letters', async () => {
+    const before = letters()
+    expect(before).toBeGreaterThan(0)
+
+    await userEvent.click(screen.getByRole('checkbox', { name: /cell borders/i }))
+
+    expect(boxes()).toBe(0)
+    expect(letters()).toBe(before)
+  })
+
+  it('keeps cells clickable with the borders hidden', async () => {
+    await userEvent.click(screen.getByRole('checkbox', { name: /cell borders/i }))
+
+    // The hit area is what makes carving still work when there is no box to aim at.
+    expect(document.querySelectorAll('.ws-cell-hit').length).toBeGreaterThan(0)
+  })
+
+  it('still tints the answer cells with the borders hidden', async () => {
+    await userEvent.click(screen.getByRole('checkbox', { name: /cell borders/i }))
+    await userEvent.click(screen.getByRole('button', { name: /highlight answers/i }))
+
+    expect(document.querySelectorAll('.ws-cell-answer').length).toBeGreaterThan(0)
+    expect(boxes()).toBe(0)
+  })
+
+  it('spreads the grid out as letter spacing increases', () => {
+    const [, , tightWidth] = viewBox()
+
+    fireEvent.change(screen.getByLabelText(/letter spacing/i), { target: { value: '12' } })
+
+    const [, , looseWidth] = viewBox()
+    expect(looseWidth).toBeGreaterThan(tightWidth)
+  })
+
+  it('separates the boxes rather than inflating them', () => {
+    const boxSize = () => Number(document.querySelector('.ws-cell-box')!.getAttribute('width'))
+    const before = boxSize()
+
+    fireEvent.change(screen.getByLabelText(/letter spacing/i), { target: { value: '16' } })
+
+    // The glyph box is fixed; spacing goes into the gap between boxes, which is
+    // what makes the control read as padding rather than as a zoom.
+    expect(boxSize()).toBe(before)
+  })
+
+  it('starts with no extra spacing', () => {
+    expect(screen.getByLabelText(/letter spacing/i)).toHaveValue('0')
+  })
+})

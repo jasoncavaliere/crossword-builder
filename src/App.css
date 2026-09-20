@@ -191,9 +191,9 @@
 /* --- grid ----------------------------------------------------------------- */
 .ws-grid {
   display: block;
-  width: 100%;
   height: auto;
   max-height: 68vh;
+  margin: 0 auto;
 }
 
 .ws-cell {
@@ -210,13 +210,21 @@
   fill: rgba(94, 234, 255, 0.18);
 }
 
-/* Masked-out cells still need a hit area so they can be clicked back in. */
-.ws-cell-void {
+/* Every cell carries a transparent hit area, including masked-out ones, so a
+   carved cell can be clicked back in and editing still works with the borders
+   hidden - there is no box to aim at in that mode. */
+.ws-cell-hit {
   fill: transparent;
 }
 
-.ws-cell:hover .ws-cell-void {
-  fill: rgba(255, 255, 255, 0.05);
+.ws-cell:hover .ws-cell-hit {
+  fill: rgba(94, 234, 255, 0.1);
+}
+
+/* Borderless mode: the answer tint is the only fill drawn, and it carries no
+   outline so the letters still read as sitting on the page background. */
+.ws-cell-bare {
+  stroke: none;
 }
 
 .ws-cell-answer {

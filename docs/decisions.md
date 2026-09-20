@@ -3,7 +3,7 @@
 What has been settled, what is deliberately still open, and what is planned. Kept so that a
 new session - human or Claude - can pick the project up without re-litigating anything.
 
-Last updated: 2026-09-20, after adding the Mickey Ears shape and answer highlighting.
+Last updated: 2026-09-20, after adding the presentation controls.
 
 ## The pivot (2026-09-20)
 
@@ -67,6 +67,8 @@ chunk at a time, with the author in the loop. That shapes a few things:
 | **The verifier re-solves the grid independently**                 | It reads the rendered letters rather than trusting the generator's own placement records, which is the only way it can catch a generator that reports a placement it never wrote. Exposed as a panel and as `window.wsb`.                                                       |
 | **Answer highlighting is an on-screen solving aid**               | Not a debugging toggle: it exists so the puzzle's owner can help someone who is stuck. That is why it sits beside Verify as a first-class button rather than hiding in the preview header, and why it survives a re-roll - it is a view preference, not a claim about one grid. |
 | **Mickey Ears joins the shape presets**                           | Three overlapping discs. The ears deliberately overlap the head rather than sitting tangent to it: tangent circles rasterize into a pinched join that can strand an ear with no run connecting it to the head.                                                                  |
+| **Cell borders are a toggle, defaulting on**                      | With them off the letters sit straight on the page background, which is closer to how the puzzle prints on fabric. Every cell keeps a transparent hit area so carving the shape still works when there is no box to aim at.                                                     |
+| **Letter spacing is a slider, added around a fixed glyph box**    | Spacing widens the gap between boxes rather than inflating them, so the control reads as padding rather than as a zoom. The SVG is sized in real pixels and capped at the panel width, so widening visibly grows the grid instead of rescaling it.                              |
 
 ### Direction vectors, for reference
 
