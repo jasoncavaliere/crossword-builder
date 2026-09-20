@@ -1,0 +1,7 @@
+dist
+coverage
+package-lock.json
+
+# Vendored NeonBlade registry sources. Kept byte-identical to upstream apart from
+# the documented type-only import fixup, so a component can be re-added and diffed.
+src/components/neonblade-ui

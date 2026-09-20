@@ -17,6 +17,12 @@ describe('Tailwind prerequisite for NeonBlade', () => {
     expect(read('src/index.css')).toMatch(/@import\s+['"]tailwindcss['"]/)
   })
 
+  it('loads the global stylesheet from the entry point', () => {
+    // Tailwind being installed is worth nothing if index.css is never imported:
+    // every gate stays green and the whole site ships unstyled.
+    expect(read('src/main.tsx')).toMatch(/import\s+['"]\.\/index\.css['"]/)
+  })
+
   it('registers the Tailwind Vite plugin', () => {
     const config = read('vite.config.ts')
     expect(config).toMatch(/from\s+['"]@tailwindcss\/vite['"]/)
