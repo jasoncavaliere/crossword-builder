@@ -1,3 +1,16 @@
+@import 'tailwindcss';
+
+/*
+ * NeonBlade components are authored against Tailwind: their layout, spacing and
+ * typography come from utility classes, and only their decorative geometry ships
+ * in the component's own stylesheet. Tailwind is therefore a prerequisite of the
+ * component library, not a styling preference of this app.
+ */
+@theme {
+  /* corner-cut-button asks for font-orbitron; map it to a stack we actually have. */
+  --font-orbitron: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
 :root {
   color-scheme: dark;
   font-family:
@@ -8,10 +21,6 @@
     Roboto,
     sans-serif;
   line-height: 1.5;
-}
-
-* {
-  box-sizing: border-box;
 }
 
 body {

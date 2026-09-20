@@ -12,7 +12,7 @@ This started as a way to put crossword puzzles on t-shirts for a trip.
 ## Stack
 
 - [React](https://react.dev) 19 + TypeScript, built with [Vite](https://vite.dev) 8
-- [NeonBlade UI](https://neonbladeui.com) for components
+- [NeonBlade UI](https://neonbladeui.com) for components, on [Tailwind](https://tailwindcss.com) 4
 - [Vitest](https://vitest.dev) + [Testing Library](https://testing-library.com) for tests
 - ESLint 10 (flat config) + Prettier
 - Client-only: no backend, no database. Deployed as a static site to GitHub Pages.
@@ -53,6 +53,29 @@ npx neonblade add corner-cut-button  # copy one in
 The CLI prompts for an output path. Accept the default `src/components`, which puts files
 at `src/components/neonblade-ui/<component>/`. Each component imports its own CSS, so
 importing the component is enough.
+
+### Two things to know before you add one
+
+**NeonBlade needs Tailwind.** A component's stylesheet ships only its decorative geometry -
+clip paths, keyframes, hover states. Its layout, spacing, and typography are Tailwind utility
+classes in the `.tsx`. Without Tailwind those classes resolve to nothing and the component
+renders unstyled while every build and test still passes, so the breakage is silent. Tailwind
+is already wired up here via `@tailwindcss/vite` and the `@import 'tailwindcss'` at the top of
+`src/index.css`; do not remove it.
+
+**Registry sources need a type-only import fixup.** This project sets
+`verbatimModuleSyntax`, and NeonBlade ships its React type imports as value imports. A freshly
+added component will fail `npm run typecheck` with `TS1484`. The fix is mechanical - split the
+types out:
+
+```diff
+-import React, { ButtonHTMLAttributes, ReactNode } from "react";
++import React from "react";
++import type { ButtonHTMLAttributes, ReactNode } from "react";
+```
+
+Drop the `React` import entirely if the component never uses it as a value. The two components
+already committed here have had this applied; re-adding either one will reintroduce the error.
 
 **Telemetry.** The NeonBlade CLI reports which components you add, and it is **on by
 default**. Turn it off once per machine:
